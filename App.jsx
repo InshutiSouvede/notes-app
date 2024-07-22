@@ -54,7 +54,9 @@ export default function App() {
         const docRef = doc(db, 'notes', noteId)
         await deleteDoc(docRef)
     }
-
+    console.log("Notes",notes)
+    const sortedNotes = notes.sort((a,b)=>b.updatedAt-a.updatedAt)
+    console.log("Sorted notes",sortedNotes)
     return (
         <main>
             {
@@ -66,7 +68,7 @@ export default function App() {
                         className="split"
                     >
                         <Sidebar
-                            notes={notes}
+                            notes={sortedNotes}
                             currentNote={currentNote}
                             setCurrentNoteId={setCurrentNoteId}
                             newNote={createNewNote}
