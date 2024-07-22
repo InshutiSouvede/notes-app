@@ -2,17 +2,14 @@ import React from "react"
 import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import Split from "react-split"
-import { nanoid } from "nanoid"
-import { addDoc, onSnapshot, doc, deleteDoc } from "firebase/firestore"
+import { addDoc, onSnapshot, doc, deleteDoc, setDoc } from "firebase/firestore"
 import { notesCollection, db } from "./firebase"
 export default function App() {
     const [notes, setNotes] = React.useState([])
     // const [notes, setNotes] = React.useState(
     //     () => JSON.parse(localStorage.getItem("notes")) || []
     // )
-    const [currentNoteId, setCurrentNoteId] = React.useState(
-        (notes[0] && notes[0].id) || ""
-    )
+    const [currentNoteId, setCurrentNoteId] = React.useState("")
     const currentNote =
         notes.find(note => note.id === currentNoteId)
         || notes[0]
@@ -33,29 +30,24 @@ export default function App() {
 
     //     localStorage.setItem("notes", JSON.stringify(notes))
     // }, [notes])
-
+    React.useEffect(()=>{
+        if(!currentNoteId){
+            setCurrentNoteId(notes[0]?.id)
+        }
+    },[notes])
     async function createNewNote() {
         const newNote = {
-            body: "# Type your markdown note's title here"
+            body: "# Type your markdown note's title here",
+            createdAt: Date.now(),
+            updatedAt: Date.now()        
         }
         const newNoteRef = await addDoc(notesCollection, newNote)
         setCurrentNoteId(newNoteRef.id)
     }
 
-    function updateNote(text) {
-        setNotes(oldNotes => {
-            const newArray = []
-            for (let i = 0; i < oldNotes.length; i++) {
-                const oldNote = oldNotes[i]
-                if (oldNote.id === currentNoteId) {
-                    // Put the most recently-modified note at the top
-                    newArray.unshift({ ...oldNote, body: text })
-                } else {
-                    newArray.push(oldNote)
-                }
-            }
-            return newArray
-        })
+    async function updateNote(text) {
+        const docRef = doc(db, 'notes', currentNoteId)
+        await setDoc(docRef,{body:text,updatedAt: Date.now()},{merge:true})
     }
 
     async function deleteNote(event, noteId) {
