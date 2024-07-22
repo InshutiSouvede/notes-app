@@ -3,8 +3,8 @@ import Sidebar from "./components/Sidebar"
 import Editor from "./components/Editor"
 import Split from "react-split"
 import { nanoid } from "nanoid"
-import { addDoc, onSnapshot, doc, deleteDoc  } from "firebase/firestore"
-import { notesCollection,db } from "./firebase"
+import { addDoc, onSnapshot, doc, deleteDoc } from "firebase/firestore"
+import { notesCollection, db } from "./firebase"
 export default function App() {
     const [notes, setNotes] = React.useState([])
     // const [notes, setNotes] = React.useState(
@@ -13,20 +13,22 @@ export default function App() {
     const [currentNoteId, setCurrentNoteId] = React.useState(
         (notes[0] && notes[0].id) || ""
     )
-    const currentNote = 
-        notes.find(note => note.id === currentNoteId) 
+    const currentNote =
+        notes.find(note => note.id === currentNoteId)
         || notes[0]
     React.useEffect(() => {
-        const unsubscribe = onSnapshot(notesCollection,function(snapshot){
+        const unsubscribe = onSnapshot(notesCollection, function (snapshot) {
             //Sync up our local notes array with the snapshot data
-        const notesArr = snapshot.docs.map((doc)=>{
-            return {...doc.data(),
-            id:doc.id
-        }})
-        setNotes(notesArr)
+            const notesArr = snapshot.docs.map((doc) => {
+                return {
+                    ...doc.data(),
+                    id: doc.id
+                }
+            })
+            setNotes(notesArr)
         })
         return unsubscribe
-        }, [])
+    }, [])
     // React.useEffect(() => {
 
     //     localStorage.setItem("notes", JSON.stringify(notes))
@@ -57,7 +59,7 @@ export default function App() {
     }
 
     async function deleteNote(event, noteId) {
-        const docRef = doc(db,'notes',noteId)
+        const docRef = doc(db, 'notes', noteId)
         await deleteDoc(docRef)
     }
 
@@ -78,14 +80,10 @@ export default function App() {
                             newNote={createNewNote}
                             deleteNote={deleteNote}
                         />
-                        {
-                            currentNoteId &&
-                            notes.length > 0 &&
-                            <Editor
-                                currentNote={currentNote}
-                                updateNote={updateNote}
-                            />
-                        }
+                        <Editor
+                            currentNote={currentNote}
+                            updateNote={updateNote}
+                        />
                     </Split>
                     :
                     <div className="no-notes">
@@ -95,7 +93,7 @@ export default function App() {
                             onClick={createNewNote}
                         >
                             Create one now
-                </button>
+                        </button>
                     </div>
 
             }
